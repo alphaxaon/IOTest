@@ -1,5 +1,7 @@
 const http = require('http');
 const io = require('socket.io');
+const Client = require('./client.js');
+
 const hostname = '127.0.0.1';
 const port = 3000;
 
@@ -21,13 +23,13 @@ websockets.on('connection', (socket) => {
 	// Connections
     socket.on('connected', () => {
     	if (!host) {
-    		host = socket;
-
+            host = socket.emit('host-connected');
     		console.log('The host has connected.');
-
     		return true;
     	}
-        
+
+        let client = new Client();
+        socket.emit('client-connected', client);
         console.log('A new client has connected.');
     });
 });
