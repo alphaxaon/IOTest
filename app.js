@@ -15,21 +15,47 @@ server.listen(port, hostname, () => {
 	console.log(`Server running at http://${hostname}:${port}/`);
 });
 
-let websockets = io.listen(server);
+let listener = io.listen(server);
 let host;
+let clients = [];
 
-websockets.on('connection', (socket) => {
+listener.on('connection', (socket) => {
 
-	// Connections
+    // Connect
     socket.on('connected', () => {
-    	if (!host) {
-            host = socket.emit('host-connected');
-    		console.log('The host has connected.');
-    		return true;
-    	}
 
+        // Host
+        if (! host) {
+            host = socket;
+            socket.emit('connected', 'host');
+            console.log('The host has connected.');
+            return;
+        }
+
+        // Clients
         let client = new Client();
-        socket.emit('client-connected', client);
-        console.log('A new client has connected.');
+        socket.emit('connected', client);
+        client.socket = socket;
+        clients.push(client);
+        console.log('A new client has connected: ' + client.id);
+    });
+
+    // Disconnect
+    socket.on('disconnect', () => {
+
+        // Host
+        if (socket == host) {
+            console.log('The host has disconnected.');
+            host = null;
+            return;
+        }
+
+        // Clients
+        for (let i in clients) {
+            if (socket != clients[i].socket)
+                continue;
+
+            console.log(clients[i].id + ' has disconnected.');
+        }
     });
 });
