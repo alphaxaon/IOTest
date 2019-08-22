@@ -58,4 +58,10 @@ listener.on('connection', (socket) => {
             console.log(clients[i].id + ' has disconnected.');
         }
     });
+
+    // Spawn Cube
+    socket.on('spawn', () => {
+        console.log('New shape spawned');
+        socket.emit('spawn');
+    });
 });
